@@ -31,7 +31,7 @@ USLUGA, SHTRAF_CHOICE, NEXT, BIO, END_OR_NOT, LOCATION, TERAPEVT_CHOICE = range(
 
 
 def start(bot, update):
-    reply_keyboard = [[u'Штраф', u'Детсад', u'Поликлиника']]
+    reply_keyboard = [[u'Штраф', u'Детсад', u'Запись к терапевту']]
 
     update.message.reply_text(
         'Добрый день!' 

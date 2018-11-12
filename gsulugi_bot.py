@@ -27,7 +27,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-USLUGA, SHTRAF_CHOICE, NEXT, BIO, END_OR_NOT, LOCATION, TERAPEVT_CHOICE = range(7)
+USLUGA, SHTRAF_CHOICE, NEXT, BIO, END_OR_NOT, LOCATION, TERAPEVT_CHOICE, TERAPEVT_ACCEPT2 = range(8)
 
 
 def start(bot, update):
@@ -65,7 +65,6 @@ def terapevt(bot, update):
                                 'Терапевт: Иванова Елена\n'
                                 'Какое время Вам удобно?',
                               reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-
     return TERAPEVT_CHOICE
 
 def terapevt_accept(bot, update):
@@ -79,7 +78,19 @@ def terapevt_accept(bot, update):
                                 'Время: 15:00\n'
                                 'Все верно?',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))    
+    return TERAPEVT_ACCEPT2
+
+def terapevt_accept2(bot, update):
+    reply_keyboard = [[u'Да', u'Нет']]
+
+    update.message.reply_text(
+                                'Ваша запись подтверждена!\n' 
+                                'Подробная информация доступна в Вашем личном кабинете.\n'
+                                'Могу еще чем-то помочь?',
+        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))    
     return END_OR_NOT
+
+
 
 def dummy_usluga(bot, update):
     reply_keyboard = [[u'Штраф', u'Детсад', u'Запись к терапевту']]
@@ -191,6 +202,9 @@ def main():
                      RegexHandler(u'^(Нет)$', bio)],
 
             TERAPEVT_CHOICE: [MessageHandler(Filters.text, terapevt_accept)],
+
+            TERAPEVT_ACCEPT2: [RegexHandler(u'^(Да)$', terapevt_accept2),
+                     RegexHandler(u'^(Нет)$', dummy_usluga)],
 
             LOCATION: [MessageHandler(Filters.location, location),
                        CommandHandler('skip', skip_location)],

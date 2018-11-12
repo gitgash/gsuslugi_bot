@@ -27,7 +27,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-USLUGA, SHTRAF_CHOICE, NEXT, BIO, END_OR_NOT, LOCATION = range(6)
+USLUGA, SHTRAF_CHOICE, NEXT, BIO, END_OR_NOT, LOCATION, TERAPEVT_CHOICE = range(7)
 
 
 def start(bot, update):
@@ -56,8 +56,33 @@ def shtraf(bot, update):
 
     return SHTRAF_CHOICE
 
+def terapevt(bot, update):
+    reply_keyboard = [[u'09:30', u'12:00', u'15:00']]
+    user = update.message.from_user
+    logger.info("Gender of %s: %s", user.first_name, update.message.text)
+    update.message.reply_text(  'Вы прикреплены к Городской поликлинике №4.\n'
+                                'Доступное время для записи на 15 ноября: 09:30, 12:00 и 15:00\n' 
+                                'Терапевт: Иванова Елена\n'
+                                'Какое время Вам удобно?',
+                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+
+    return TERAPEVT_CHOICE
+
+def terapevt_accept(bot, update):
+    reply_keyboard = [[u'Да', u'Нет']]
+
+    update.message.reply_text(
+                                'Давайте проверим данные:\n'
+                                'Городская поликлиника №4\n'
+                                'Терапевт: Иванова Елена\n'
+                                'Дата приема: 15 ноября\n'
+                                'Время: 15:00\n'
+                                'Все верно?',
+        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))    
+    return END_OR_NOT
+
 def dummy_usluga(bot, update):
-    reply_keyboard = [[u'Штраф', u'Детсад', u'Поликлиника']]
+    reply_keyboard = [[u'Штраф', u'Детсад', u'Запись к терапевту']]
 
     update.message.reply_text(
         'К сожалению в данный момент услуга не реализована!' 
@@ -153,7 +178,8 @@ def main():
 
         states={
             USLUGA: [RegexHandler(u'^(Штраф)$', shtraf),
-                     RegexHandler(u'^(Детсад|Поликлиника)$', dummy_usluga)],
+                     RegexHandler(u'^(Запись к терапевту)$', terapevt),
+                     RegexHandler(u'^(Детсад)$', dummy_usluga)],
 
             SHTRAF_CHOICE: [RegexHandler(u'^(Проверить наличие)$', shtraf_info),
                      RegexHandler(u'^(Произвести оплату)$', dummy_usluga)],
@@ -163,6 +189,8 @@ def main():
 
             END_OR_NOT: [RegexHandler(u'^(Да)$', dummy_usluga),
                      RegexHandler(u'^(Нет)$', bio)],
+
+            TERAPEVT_CHOICE: [MessageHandler(Filters.text, terapevt_accept)],
 
             LOCATION: [MessageHandler(Filters.location, location),
                        CommandHandler('skip', skip_location)],
